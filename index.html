@@ -28,11 +28,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #1a1a1a;
-            --board-color: #f3e5ab;
-            --board-border: #5d4037;
-            --accent: #00ffcc;
-            --ui-bg: rgba(0, 0, 0, 0.85);
+            --bg-dark: #050505;
+            --neon-blue: #00f3ff;
+            --neon-pink: #ff00cc;
+            --neon-yellow: #ffee00;
+            --glass-bg: rgba(20, 20, 20, 0.6);
+            --border-glow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue);
+            --text-glow: 0 0 10px rgba(255, 255, 255, 0.8);
         }
 
         * {
@@ -46,19 +48,31 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: var(--bg-color);
-            background: radial-gradient(circle at center, #2a2a2a, #000);
-            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            /* Retro-wave Grid Background */
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 0, 204, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center;
+            font-family: 'Orbitron', sans-serif; /* Switched primary font to Sci-Fi */
             color: white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            padding-top: env(safe-area-inset-top);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
-            padding-bottom: env(safe-area-inset-bottom);
+            text-transform: uppercase;
+        }
+
+        /* Vignette overlay for atmosphere */
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 40%, #000 100%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         /* UI Overlays */
@@ -80,37 +94,57 @@
             display: flex;
             justify-content: space-between;
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            max-width: 650px;
+            margin: 10px auto;
         }
 
         .player-score {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(5px);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: 2px solid #333;
+            backdrop-filter: blur(10px);
             text-align: center;
-            transition: transform 0.3s, border-color 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 140px;
         }
 
-        .player-score.active {
-            border-color: var(--accent);
-            transform: scale(1.1);
-            box-shadow: 0 0 15px var(--accent);
+        /* Player 1 Specifics (Pink Theme) */
+        #p1-score-box {
+            border-color: rgba(255, 0, 204, 0.3);
+            color: #fff;
         }
+        #p1-score-box.active {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px var(--neon-pink), inset 0 0 10px rgba(255, 0, 204, 0.2);
+            transform: scale(1.05);
+        }
+        #p1-score-box h3 { color: var(--neon-pink); }
+
+        /* Player 2 Specifics (Blue Theme) */
+        #p2-score-box {
+            border-color: rgba(0, 243, 255, 0.3);
+            color: #fff;
+        }
+        #p2-score-box.active {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px var(--neon-blue), inset 0 0 10px rgba(0, 243, 255, 0.2);
+            transform: scale(1.05);
+        }
+        #p2-score-box h3 { color: var(--neon-blue); }
 
         .player-score h3 {
-            margin: 0;
-            font-size: 0.8rem;
-            opacity: 0.8;
+            margin: 0 0 5px 0;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px currentColor;
         }
 
         .player-score span {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
         }
 
         #turn-indicator {
@@ -118,12 +152,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            font-weight: bold;
             color: var(--accent);
             opacity: 0;
-            transition: opacity 0.5s;
-            text-shadow: 0 0 20px var(--accent);
+            transition: opacity 0.3s;
+            text-shadow: 0 0 20px var(--neon-yellow), 0 0 40px var(--neon-yellow);
+            white-space: nowrap;
+            letter-spacing: 5px;
+            z-index: 15;
+            pointer-events: none;
         }
 
         /* Menus */
@@ -133,12 +171,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.92);
+            backdrop-filter: blur(5px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 20;
+            z-index: 100;
             pointer-events: auto;
         }
 
@@ -147,71 +186,102 @@
         }
 
         h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 3rem;
-            margin-bottom: 10px;
-            background: linear-gradient(to right, #00ffcc, #007bff);
+            font-size: 3.5rem;
+            margin-bottom: 30px;
+            color: #fff;
+            text-align: center;
+            /* Multi-color neon gradient text */
+            background: linear-gradient(to right, var(--neon-pink), #fff, var(--neon-blue));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(0, 255, 204, 0.3);
-            text-align: center;
+            text-shadow: 0 0 20px rgba(255,255,255,0.4);
+            letter-spacing: 4px;
         }
 
         .btn {
-            background: linear-gradient(45deg, #00ffcc, #007bff);
-            border: none;
-            padding: 15px 40px;
-            margin: 10px;
-            border-radius: 30px;
-            color: white;
+            background: transparent;
+            border: 2px solid var(--neon-blue);
+            padding: 18px 40px;
+            margin: 15px;
+            border-radius: 4px; /* Slightly squared for tech look */
+            color: var(--neon-blue);
             font-family: 'Orbitron', sans-serif;
             font-size: 1.2rem;
+            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.2s;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            width: 250px;
+            letter-spacing: 3px;
+            width: 280px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
         }
 
         .btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-blue);
             transform: scale(1.05);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.6);
         }
 
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid #555;
+        /* Alternate color for second button */
+        .btn:nth-of-type(2) {
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+            box-shadow: 0 0 10px rgba(255, 0, 204, 0.2);
+        }
+        .btn:nth-of-type(2):hover {
+            background: var(--neon-pink);
+            color: #000;
+            box-shadow: 0 0 30px var(--neon-pink);
         }
 
-        .btn-secondary:hover {
-            border-color: #fff;
-            box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-
-        /* Canvas Container */
+        /* Game Container & Canvas */
         #game-container {
             position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
             border-radius: 20px;
-            overflow: hidden;
+            padding: 5px;
+            /* Outer Neon Ring */
+            box-shadow: 
+                0 0 20px var(--neon-blue), 
+                0 0 60px var(--neon-pink);
+            background: linear-gradient(45deg, var(--neon-blue), var(--neon-pink));
+            z-index: 5;
         }
 
         canvas {
-            border-radius: 4px; /* Soften internal corners */
+            border-radius: 16px;
             cursor: crosshair;
+            display: block;
+            /* THE MAGIC FILTER: 
+               This inverts the wood colors (Beige/Brown) from the JS 
+               turning them into Dark Blue/Cyan automatically. 
+               It gives a dark mode look without changing the JS logic.
+            */
+            /*filter: invert(1) hue-rotate(180deg) brightness(1.2) contrast(1.1);*/
         }
 
         .controls-hint {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             width: 100%;
             text-align: center;
-            color: rgba(255,255,255,0.5);
-            font-size: 0.9rem;
-            pointer-events: none;
+            color: var(--neon-blue);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            opacity: 0.8;
+            text-shadow: 0 0 5px var(--neon-blue);
+            animation: pulse 2s infinite;
         }
 
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; text-shadow: 0 0 15px var(--neon-blue); }
+            100% { opacity: 0.5; }
+        }
     </style>
+
 </head>
 <body>
 
@@ -227,7 +297,7 @@
             </div>
         </div>
         <div id="turn-indicator">YOUR TURN</div>
-        <div class="controls-hint" id="controls-hint">Drag Striker to Position • Pull Back to Shoot</div>
+        <div class="controls-hint" id="controls-hint">Drag Striker to Position<br>Pull Back to Shoot</div>
     </div>
 
     <div id="main-menu" class="modal">
