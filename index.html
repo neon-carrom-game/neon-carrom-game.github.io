@@ -73,25 +73,29 @@
          }
          /* UI Overlays */
          #ui-layer {
-         position: absolute;
-         top: 0;
-         left: 0;
-         width: 100%;
-         height: 100%;
-         pointer-events: none;
-         display: flex;
-         flex-direction: column;
-         justify-content: space-between;
-         padding: 20px;
-         z-index: 10;
-         }
-         .score-board {
-         display: flex;
-         justify-content: space-between;
-         width: 100%;
-         max-width: 650px;
-         margin: 10px auto;
-         }
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   pointer-events: none;
+   display: flex;
+   flex-direction: column;
+   justify-content: center; /* Center the overlay items (turn text) */
+   z-index: 10;
+}
+
+/* Score Board - Now controls its own spacing */
+.score-board {
+   display: flex;
+   justify-content: space-between;
+   width: 100%;
+   max-width: 650px;
+   padding: 10px 20px; /* Added horizontal padding */
+   margin: 0 auto 5px auto; /* Reduced bottom margin */
+   z-index: 20; /* Ensure it stays above everything */
+   flex-shrink: 0; /* Prevent it from squishing */
+}
          .player-score {
          background: rgba(0, 0, 0, 0.8);
          padding: 15px 30px;
@@ -434,8 +438,7 @@
          </div>
       </div>
       <!-- App Install Popup -->
-      <div id="ui-layer">
-         <div class="score-board">
+      <div class="score-board">
             <div id="p1-score-box" class="player-score active">
                <h3>PLAYER 1</h3>
                <span id="score-p1">0</span>
@@ -444,7 +447,8 @@
                <h3 id="p2-name">PLAYER 2</h3>
                <span id="score-p2">0</span>
             </div>
-         </div>
+      </div>
+      <div id="ui-layer">
          <div id="turn-indicator">YOUR TURN</div>
          <div class="controls-hint" id="controls-hint">Drag Striker to Position<br>Pull Back to Shoot</div>
       </div>
@@ -658,16 +662,27 @@
           */
          
          function resize() {
-             // Keep board square and fitting within screen
-             const size = Math.min(window.innerWidth, window.innerHeight) * 0.95;
-             canvas.width = size;
-             canvas.height = size;
-             gameState.boardSize = size;
-             
-             // Resize entities if game is running (simple rescale)
-             // For simplicity in this single file, we just re-setup board on strict resize or rely on relative math
-             // A full production game would scale vectors. Here we'll just center things.
-         }
+   // 1. Get the height of the scoreboard
+   const scoreBoard = document.querySelector('.score-board');
+   const sbHeight = scoreBoard ? scoreBoard.offsetHeight : 0;
+   
+   // 2. Calculate available space (Window Height - Scoreboard Height - Padding)
+   const availableHeight = window.innerHeight - sbHeight - 20; // 20px buffer
+   const availableWidth = window.innerWidth;
+
+   // 3. Determine size based on the smaller dimension
+   const size = Math.min(availableWidth, availableHeight) * 0.95;
+
+   canvas.width = size;
+   canvas.height = size;
+   gameState.boardSize = size;
+   
+   // Redraw immediately to prevent flickering
+   if (gameState.pieces.length > 0) {
+       // Optional: Recenter pieces if you were scaling them, 
+       // but for this fix, we just ensure the board fits.
+   }
+}
          
          function initBoard() {
              resize();
