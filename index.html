@@ -421,7 +421,7 @@
       <div id="install-popup-overlay" class="install-popup-overlay">
          <div class="install-popup">
             <div class="install-popup-icon">
-               <ion-icon name="flash"></ion-icon>
+               <ion-icon name="download-outline"></ion-icon>
             </div>
             <h2>Install Neon Carrom</h2>
             <p>Get the full app experience! Install our app for faster access, offline features, and a native app feel.</p>
@@ -1157,7 +1157,7 @@
          // Register Service Worker
          if ('serviceWorker' in navigator) {
          window.addEventListener('load', () => {
-         navigator.serviceWorker.register('/jvp-spark/sw.js')
+         navigator.serviceWorker.register('/sw.js')
            .then((registration) => {
              console.log('SW registered: ', registration);
            })
@@ -1242,5 +1242,8 @@
          }
          
       </script>
+      <!-- Ion Icons -->
+      <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+      <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
    </body>
 </html>
